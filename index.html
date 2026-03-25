@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kalkulus Integral + Game Strike (Target 1-100, Trumpet High Score)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.7.0/math.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s;
+        }
+        .main-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .game-col {
+            flex: 1.2;
+            min-width: 300px;
+        }
+        .calc-col {
+            flex: 2;
+            min-width: 400px;
+        }
+        .calc-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            padding: 30px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .game-container {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            padding: 20px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .game-panel {
+            background: #fef9e8;
+            border-radius: 44px;
+            padding: 20px 25px 25px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #4a00e0;
+            margin-top: 0;
+            border-bottom: 3px solid #8e2de2;
+            padding-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
+        }
+        #randomThemeBtn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: 0.3s;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .tab-button {
+            background: linear-gradient(145deg, #f0f0f0, #ffffff);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+            flex: 1 1 auto;
+            min-width: 120px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .tab-button.active {
+            background: linear-gradient(145deg, #8e2de2, #4a00e0);
+            color: white;
+            box-shadow: 0 8px 20px rgba(142,45,226,0.6);
+            transform: translateY(-2px);
+        }
+        .tab-content {
+            display: none;
+            animation: fade 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background: rgba(255,255,255,0.8);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .col {
+            flex: 1 1 200px;
+        }
+        label {
+            font-weight: 600;
+            color: #4a00e0;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 14px;
+            background: white;
+        }
+        .btn {
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 60px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+            margin: 10px 0;
+        }
+        .result-box {
+            margin-top: 15px;
+            background: #2d3436;
+            color: #f6e58d;
+            padding: 15px;
+            border-radius: 20px;
+            font-size: 22px;
+            text-align: center;
+            font-family: monospace;
+            border-left: 10px solid #f9ca24;
+        }
+        .info {
+            background: #dff9fb;
+            padding: 10px;
+            border-radius: 16px;
+            margin: 10px 0;
+            font-size: 13px;
+            border-left: 6px solid #22a6b3;
+        }
+        .chart-container {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 24px;
+            padding: 15px;
+            height: 280px;
+            width: 100%;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #4a00e0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .enemy-sprite {
+            margin: 10px auto;
+            width: 100px;
+            animation: float 1.8s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        .enemy-target {
+            background: #ffd966;
+            border-radius: 60px;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .attack-btn {
+            background: #e05a2a;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 6px 0 #81371a;
+            transition: 0.05s linear;
+        }
+        .attack-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #81371a;
+        }
+        .timer-area {
+            background: #2c5a6e;
+            border-radius: 50px;
+            padding: 6px 12px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .timer-number {
+            font-size: 2rem;
+            font-family: monospace;
+            font-weight: 800;
+        }
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 30px;
+            padding: 6px 12px;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #508d7a;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .slider-group {
+            margin-bottom: 12px;
+        }
+        .slider-group label {
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .feedback {
+            background: #fff0d4;
+            padding: 10px;
+            border-radius: 50px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .blink {
+            animation: blinkAnim 0.2s 3;
+        }
+        @keyframes blinkAnim {
+            0% { background: #ffaa66; }
+            50% { background: #ff6644; }
+            100% { background: #ffaa66; }
+        }
+        .game-over-overlay {
+            filter: grayscale(0.3);
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        button:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+        @media (max-width: 900px) {
+            .main-grid { flex-direction: column; }
+            .game-col, .calc-col { width: 100%; }
+        }
+
+        /* Modal popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: #2d2f36;
+            border-radius: 40px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 80%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: popup 0.3s ease-out;
+            border: 2px solid #ff6b6b;
+        }
+        @keyframes popup {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .skull-icon {
+            font-size: 80px;
+            margin-bottom: 10px;
+        }
+        .modal-content h2 {
+            color: #ff6b6b;
+            margin: 10px 0;
+            font-size: 28px;
+        }
+        .modal-content p {
+            color: #eee;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .modal-btn {
+            background: #ff8c42;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .modal-btn:hover {
+            background: #ffa05e;
+            transform: scale(1.02);
+        }
+        .success-flash {
+            background-color: #c3e6cb !important;
+            color: #155724 !important;
+            transition: 0.1s;
+        }
+        /* Notifikasi trumpet */
+        .trumpet-notification {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #ffd966, #ffb347);
+            color: #2c3e2f;
+            padding: 20px 40px;
+            border-radius: 80px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            white-space: nowrap;
+            animation: fadeInOut 2s ease-in-out;
+            border: 2px solid white;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+    </style>
+</head>
+<body>
+<div class="main-grid">
+    <!-- Kolom Game Integral Strike (Mode Mudah - Target 1-100) -->
+    <div class="game-col">
+        <div class="game-container">
+            <div class="game-panel" id="gamePanel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin:0;">⚔️ INTEGRAL STRIKE (EASY MODE)</h2>
+                    <div class="timer-area">⏱️ <span id="timerDisplay" class="timer-number">130</span> detik</div>
+                </div>
+                <p style="font-size: 0.8rem; margin: 5px 0 15px;">🎯 atur a & b → nilai integral mendekati target (toleransi ±0.8) → STRIKE!</p>
+                <!-- Grafik game -->
+                <canvas id="gameCanvas" width="600" height="300" style="width:100%; height:auto; background:white; border-radius:20px; margin-bottom:15px;"></canvas>
+                <!-- Slider a dan b -->
+                <div class="slider-group">
+                    <label>📌 Batas a <span id="gameAValue" style="background:#ddd; padding:2px 8px; border-radius:20px;">0.00</span></label>
+                    <input type="range" id="gameSliderA" min="-5" max="5" step="0.02" value="0.5">
+                </div>
+                <div class="slider-group">
+                    <label>📍 Batas b <span id="gameBValue" style="background:#ddd; padding:2px 8px; border-radius:20px;">2.00</span></label>
+                    <input type="range" id="gameSliderB" min="-5" max="5" step="0.02" value="2.0">
+                </div>
+                <div class="slider-group">
+                    <label>📐 Fungsi:</label>
+                    <select id="gameFuncSelect">
+                        <option value="square">f(x) = x²</option>
+                        <option value="sin">f(x) = sin(x)</option>
+                        <option value="cubic">f(x) = x³−2x</option>
+                    </select>
+                </div>
+                <div class="stat-card" style="margin:10px 0;">
+                    <div class="stat-label">📊 INTEGRAL (a→b)</div>
+                    <div class="stat-value" id="gameIntegralDisplay">0.0000</div>
+                </div>
+                <!-- Musuh dan serangan -->
+                <div id="enemyZone" style="text-align:center;">
+                    <div class="enemy-sprite">
+                        <svg width="80" height="80" viewBox="0 0 100 100" style="filter: drop-shadow(0 8px 12px rgba(0,0,0,0.2));">
+                            <circle cx="50" cy="50" r="42" fill="#ff7e5e" stroke="#b94b2a" stroke-width="3"/>
+                            <circle cx="35" cy="40" r="5" fill="white"/>
+                            <circle cx="65" cy="40" r="5" fill="white"/>
+                            <circle cx="35" cy="40" r="2" fill="black"/>
+                            <circle cx="65" cy="40" r="2" fill="black"/>
+                            <path d="M35 65 Q50 75 65 65" stroke="#5a2e1a" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="enemy-target">
+                        🎯 TARGET <br> <span id="targetAreaDisplay" style="font-size:1.8rem;">0.00</span>
+                    </div>
+                    <button id="attackBtn" class="attack-btn">⚔️ STRIKE! ⚔️</button>
+                </div>
+                <div class="score-board">
+                    <div class="stat-card"><div class="stat-label">🏆 SKOR</div><div class="stat-value" id="scoreDisplay">0</div></div>
+                    <div class="stat-card"><div class="stat-label">🏅 HIGH SCORE</div><div class="stat-value" id="highScoreDisplay">0</div></div>
+                </div>
+                <div id="gameFeedback" class="feedback">✨ Atur slider lalu STRIKE! (toleransi ±0.8)</div>
+                <button id="resetGameBtn" style="background:#4f7e6b; width:100%; margin-top:15px;">🔄 RESET GAME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kolom Kalkulator Integral (luas, volume, dll) -->
+    <div class="calc-col">
+        <div class="calc-container">
+            <div class="header">
+                <h1>📐 APLIKASI INTEGRAL KALKULUS</h1>
+                <button id="randomThemeBtn" title="Ganti tema warna">🎨</button>
+            </div>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="luas">📏 Luas Daerah</button>
+                <button class="tab-button" data-tab="volume">🥫 Volume Benda Putar</button>
+                <button class="tab-button" data-tab="pusat">⚖️ Pusat Massa</button>
+                <button class="tab-button" data-tab="kerja">🔧 Kerja (Usaha)</button>
+            </div>
+
+            <!-- Tab Luas -->
+            <div id="luas" class="tab-content active">
+                <div class="card">
+                    <h3>Luas antara dua kurva</h3>
+                    <div class="info">\( L = \int_a^b |f(x) - g(x)| \, dx \)</div>
+                    <div class="row">
+                        <div class="col"><label>f(x) atas:</label><input type="text" id="luas_f" value="x+4"></div>
+                        <div class="col"><label>g(x) bawah:</label><input type="text" id="luas_g" value="x^2-2"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><label>a:</label><input type="number" id="luas_a" value="-2" step="any"></div>
+                        <div class="col"><label>b:</label><input type="number" id="luas_b" value="3" step="any"></div>
+                    </div>
+                    <button class="btn" id="hitungLuas">✨ Hitung Luas & Grafik</button>
+                    <div id="hasilLuas" class="result-box">Hasil</div>
+                    <div class="chart-container"><canvas id="chartLuas"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Tab Volume -->
+            <div id="volume" class="tab-content">
+                <div class="card">
+                    <h3>Volume Benda Putar</h3>
+                    <div class="row"><div class="col"><label>Metode:</label><select id="vol_metode"><option value="cakram">Cakram (sumbu x)</option><option value="cakram_y">Cakram (sumbu y)</option><option value="cincin">Cincin (sumbu x)</option><option value="kulit">Kulit Tabung</option></select></div></div>
+                    <div id="vol_inputs"></div>
+                    <button class="btn" id="hitungVolume">✨ Hitung Volume & Grafik</button>
+                    <div id="hasilVolume" class="result-box">Hasil</div>
+                    <div class="chart-container"><canvas id="chartVolume"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Tab Pusat Massa -->
+            <div id="pusat" class="tab-content">
+                <div class="card">
+                    <h3>Pusat Massa (x̄, ȳ)</h3>
+                    <div class="row"><div class="col"><label>f(x) atas:</label><input type="text" id="pusat_f" value="4"></div><div class="col"><label>g(x) bawah:</label><input type="text" id="pusat_g" value="x^2"></div></div>
+                    <div class="row"><div class="col"><label>a:</label><input type="number" id="pusat_a" value="-2"></div><div class="col"><label>b:</label><input type="number" id="pusat_b" value="2"></div></div>
+                    <button class="btn" id="hitungPusat">✨ Hitung Pusat Massa & Grafik</button>
+                    <div id="hasilPusat" class="result-box">Hasil</div>
+                    <div class="chart-container"><canvas id="chartPusat"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Tab Kerja -->
+            <div id="kerja" class="tab-content">
+                <div class="card">
+                    <h3>Kerja (Usaha)</h3>
+                    <div class="row"><div class="col"><label>Jenis:</label><select id="kerja_jenis"><option value="pegas">Pegas</option><option value="rantai">Rantai</option><option value="tangki">Tangki kerucut</option></select></div></div>
+                    <div id="kerja_inputs"></div>
+                    <button class="btn" id="hitungKerja">✨ Hitung Usaha</button>
+                    <div id="hasilKerja" class="result-box">Hasil</div>
+                </div>
+            </div>
+            <footer>Proyek OBE - Kalkulus Integral | Game + Kalkulator Terintegrasi (Target 1-100)</footer>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Popup Gagal -->
+<div id="gameOverModal" class="modal">
+    <div class="modal-content">
+        <div class="skull-icon">💀</div>
+        <h2>ANDA GAGAL!</h2>
+        <p>Silakan mencoba lagi</p>
+        <button id="modalResetBtn" class="modal-btn">Coba Lagi 🔄</button>
+    </div>
+</div>
+
+<script>
+    // ==================== FUNGSI WARNA TEMA ACAK ====================
+    function randomColor() { return `hsl(${Math.floor(Math.random() * 360)}, 80%, 60%)`; }
+    function randomTheme() {
+        const hue1 = Math.floor(Math.random() * 360);
+        const hue2 = (hue1 + 40) % 360;
+        const grad1 = `hsl(${hue1}, 70%, 55%)`;
+        const grad2 = `hsl(${hue2}, 70%, 45%)`;
+        document.body.style.background = `linear-gradient(135deg, ${grad1} 0%, ${grad2} 100%)`;
+        const activeColor = `hsl(${hue1}, 80%, 50%)`;
+        let style = document.getElementById('dynamic-theme');
+        if (style) style.remove();
+        style = document.createElement('style');
+        style.id = 'dynamic-theme';
+        style.textContent = `
+            .tab-button.active { background: linear-gradient(145deg, ${activeColor}, hsl(${hue2},70%,40%)) !important; box-shadow: 0 8px 20px ${activeColor}80 !important; }
+            .btn { background: linear-gradient(45deg, ${activeColor}, hsl(${hue2},70%,40%)) !important; box-shadow: 0 8px 20px ${activeColor}80 !important; }
+            .btn:hover { background: linear-gradient(45deg, hsl(${hue1},70%,60%), hsl(${hue2},70%,50%)) !important; }
+            h1 { border-bottom-color: ${activeColor} !important; }
+            label { color: ${activeColor} !important; }
+            .result-box { border-left-color: ${activeColor} !important; }
+            .info { border-left-color: ${activeColor} !important; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // ==================== FUNGSI INTEGRAL NUMERIK ====================
+    function integral(f, a, b, n = 1000) {
+        if (a === b) return 0;
+        let h = (b - a) / n;
+        let sum = 0.5 * (f(a) + f(b));
+        for (let i = 1; i < n; i++) sum += f(a + i * h);
+        return sum * h;
+    }
+
+    function makeFunction(expr) {
+        try {
+            const compiled = math.compile(expr);
+            return (x) => { try { return compiled.evaluate({ x: x }); } catch(e) { return NaN; } };
+        } catch(e) { return null; }
+    }
+
+    // ==================== KALKULATOR: TAB SWITCHING ====================
+    const tabBtns = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // ==================== GRAFIK KALKULATOR ====================
+    let luasChart, volumeChart, pusatChart;
+    function renderChart(canvasId, chartRef, datasets, xLabel = 'x', yLabel = 'y') {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        const ctx = canvas.getContext('2d');
+        if (chartRef) chartRef.destroy();
+        const container = canvas.parentElement;
+        const width = container.clientWidth > 0 ? container.clientWidth : 600;
+        const height = container.clientHeight > 0 ? container.clientHeight : 280;
+        canvas.width = width; canvas.height = height;
+        canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+        datasets.forEach(ds => { if (!ds.borderColor) ds.borderColor = randomColor(); ds.backgroundColor = 'transparent'; ds.borderWidth = 2; ds.tension = 0.1; });
+        return new Chart(ctx, {
+            type: 'line', data: { datasets: datasets },
+            options: { responsive: false, maintainAspectRatio: false, scales: { x: { type: 'linear', title: { display: true, text: xLabel } }, y: { title: { display: true, text: yLabel } } }, plugins: { legend: { display: true } }, elements: { point: { radius: 0 } } }
+        });
+    }
+    function generatePoints(func, xMin, xMax, steps = 200) {
+        let points = [];
+        let step = (xMax - xMin) / steps;
+        for (let i = 0; i <= steps; i++) { let x = xMin + i * step; points.push({ x: x, y: func(x) }); }
+        return points;
+    }
+
+    // Luas
+    document.getElementById('hitungLuas').addEventListener('click', () => {
+        const f = makeFunction(document.getElementById('luas_f').value);
+        const g = makeFunction(document.getElementById('luas_g').value);
+        const a = parseFloat(document.getElementById('luas_a').value);
+        const b = parseFloat(document.getElementById('luas_b').value);
+        if (!f || !g || isNaN(a) || isNaN(b)) { alert('Input tidak valid'); return; }
+        const luas = integral(x => Math.abs(f(x) - g(x)), a, b, 5000);
+        document.getElementById('hasilLuas').innerHTML = `Luas = ${luas.toFixed(6)}`;
+        const pad = (b - a) * 0.2;
+        const xMin = a - pad, xMax = b + pad;
+        luasChart = renderChart('chartLuas', luasChart, [
+            { label: `f(x)`, data: generatePoints(f, xMin, xMax) },
+            { label: `g(x)`, data: generatePoints(g, xMin, xMax) }
+        ]);
+    });
+
+    // Volume (dinamis)
+    const volMetode = document.getElementById('vol_metode');
+    const volInputsDiv = document.getElementById('vol_inputs');
+    function updateVolInputs() {
+        const metode = volMetode.value;
+        let html = '';
+        if (metode === 'cakram') html = `<div class="row"><div class="col"><label>f(x):</label><input type="text" id="vol_f" value="1-x^2"></div></div><div class="row"><div class="col"><label>a:</label><input type="number" id="vol_a" value="0"></div><div class="col"><label>b:</label><input type="number" id="vol_b" value="1"></div></div>`;
+        else if (metode === 'cakram_y') html = `<div class="row"><div class="col"><label>f(y):</label><input type="text" id="vol_f" value="sqrt(y)"></div></div><div class="row"><div class="col"><label>a(y):</label><input type="number" id="vol_a" value="0"></div><div class="col"><label>b(y):</label><input type="number" id="vol_b" value="4"></div></div>`;
+        else if (metode === 'cincin') html = `<div class="row"><div class="col"><label>f(x) luar:</label><input type="text" id="vol_f" value="2x"></div><div class="col"><label>g(x) dalam:</label><input type="text" id="vol_g" value="x^2"></div></div><div class="row"><div class="col"><label>a:</label><input type="number" id="vol_a" value="0"></div><div class="col"><label>b:</label><input type="number" id="vol_b" value="2"></div></div>`;
+        else if (metode === 'kulit') html = `<div class="row"><div class="col"><label>h(x):</label><input type="text" id="vol_f" value="(2-x)-x^2"></div></div><div class="row"><div class="col"><label>a:</label><input type="number" id="vol_a" value="0"></div><div class="col"><label>b:</label><input type="number" id="vol_b" value="1"></div></div>`;
+        volInputsDiv.innerHTML = html;
+    }
+    volMetode.addEventListener('change', updateVolInputs);
+    updateVolInputs();
+
+    document.getElementById('hitungVolume').addEventListener('click', () => {
+        const metode = volMetode.value;
+        let hasil = 0, f, g, a, b;
+        try {
+            if (metode === 'cakram') { f = makeFunction(document.getElementById('vol_f').value); a = parseFloat(document.getElementById('vol_a').value); b = parseFloat(document.getElementById('vol_b').value); hasil = Math.PI * integral(x => Math.pow(f(x),2), a, b, 5000); }
+            else if (metode === 'cakram_y') { f = makeFunction(document.getElementById('vol_f').value); a = parseFloat(document.getElementById('vol_a').value); b = parseFloat(document.getElementById('vol_b').value); hasil = Math.PI * integral(y => Math.pow(f(y),2), a, b, 5000); }
+            else if (metode === 'cincin') { f = makeFunction(document.getElementById('vol_f').value); g = makeFunction(document.getElementById('vol_g').value); a = parseFloat(document.getElementById('vol_a').value); b = parseFloat(document.getElementById('vol_b').value); hasil = Math.PI * integral(x => Math.pow(f(x),2) - Math.pow(g(x),2), a, b, 5000); }
+            else if (metode === 'kulit') { f = makeFunction(document.getElementById('vol_f').value); a = parseFloat(document.getElementById('vol_a').value); b = parseFloat(document.getElementById('vol_b').value); hasil = 2 * Math.PI * integral(x => x * f(x), a, b, 5000); }
+            document.getElementById('hasilVolume').innerHTML = `Volume = ${hasil.toFixed(6)}`;
+        } catch(e) { alert('Error: '+e); }
+    });
+
+    // Pusat Massa
+    document.getElementById('hitungPusat').addEventListener('click', () => {
+        const f = makeFunction(document.getElementById('pusat_f').value);
+        const g = makeFunction(document.getElementById('pusat_g').value);
+        const a = parseFloat(document.getElementById('pusat_a').value);
+        const b = parseFloat(document.getElementById('pusat_b').value);
+        if (!f || !g) return;
+        const m = integral(x => f(x)-g(x), a, b, 5000);
+        if (m === 0) { alert('Massa nol'); return; }
+        const Mx = 0.5 * integral(x => Math.pow(f(x),2)-Math.pow(g(x),2), a, b, 5000);
+        const My = integral(x => x*(f(x)-g(x)), a, b, 5000);
+        document.getElementById('hasilPusat').innerHTML = `x̄ = ${(My/m).toFixed(6)}, ȳ = ${(Mx/m).toFixed(6)}`;
+        const pad = (b-a)*0.2;
+        const xMin = a-pad, xMax = b+pad;
+        pusatChart = renderChart('chartPusat', pusatChart, [
+            { label: 'f(x)', data: generatePoints(f, xMin, xMax) },
+            { label: 'g(x)', data: generatePoints(g, xMin, xMax) }
+        ]);
+    });
+
+    // Kerja
+    const kerjaJenis = document.getElementById('kerja_jenis');
+    const kerjaInputsDiv = document.getElementById('kerja_inputs');
+    function updateKerjaInputs() {
+        const jenis = kerjaJenis.value;
+        let html = '';
+        if (jenis === 'pegas') html = `<div class="row"><div class="col"><label>k:</label><input type="number" id="kerja_k" value="5"></div></div><div class="row"><div class="col"><label>x0:</label><input type="number" id="kerja_x0" value="0"></div><div class="col"><label>x1:</label><input type="number" id="kerja_x1" value="3"></div></div>`;
+        else if (jenis === 'rantai') html = `<div class="row"><div class="col"><label>berat per ft:</label><input type="number" id="kerja_w" value="2"></div><div class="col"><label>panjang L:</label><input type="number" id="kerja_L" value="100"></div></div>`;
+        else if (jenis === 'tangki') html = `<div class="row"><div class="col"><label>Tinggi H:</label><input type="number" id="kerja_H" value="10"></div><div class="col"><label>Jari2 R:</label><input type="number" id="kerja_R" value="4"></div></div><div class="row"><div class="col"><label>ρ:</label><input type="number" id="kerja_rho" value="62.5"></div></div>`;
+        kerjaInputsDiv.innerHTML = html;
+    }
+    kerjaJenis.addEventListener('change', updateKerjaInputs);
+    updateKerjaInputs();
+
+    document.getElementById('hitungKerja').addEventListener('click', () => {
+        const jenis = kerjaJenis.value;
+        let hasil = 0;
+        if (jenis === 'pegas') { const k=parseFloat(document.getElementById('kerja_k').value), x0=parseFloat(document.getElementById('kerja_x0').value), x1=parseFloat(document.getElementById('kerja_x1').value); hasil = integral(x=>k*x, x0, x1, 5000); }
+        else if (jenis === 'rantai') { const w=parseFloat(document.getElementById('kerja_w').value), L=parseFloat(document.getElementById('kerja_L').value); hasil = integral(y=>w*(L-y), 0, L, 5000); }
+        else if (jenis === 'tangki') { const H=parseFloat(document.getElementById('kerja_H').value), R=parseFloat(document.getElementById('kerja_R').value), rho=parseFloat(document.getElementById('kerja_rho').value); hasil = integral(y=>rho*Math.PI*Math.pow((R/H)*y,2)*(H-y), 0, H, 5000); }
+        document.getElementById('hasilKerja').innerHTML = `Usaha = ${hasil.toFixed(6)} satuan`;
+    });
+
+    randomTheme();
+    document.getElementById('randomThemeBtn').addEventListener('click', randomTheme);
+
+    // ==================== GAME INTEGRAL STRIKE ====================
+    const gameCanvas = document.getElementById('gameCanvas');
+    const ctxGame = gameCanvas.getContext('2d');
+    let gameWidth = 600, gameHeight = 300;
+    gameCanvas.width = gameWidth; gameCanvas.height = gameHeight;
+    // Perluas dunia x: -5.2 sampai 5.5, y: -2.5 sampai 35 (agar x² pada [-5,5] maks 25 terlihat)
+    let xMinWorld = -5.2, xMaxWorld = 5.5, yMinWorld = -2.5, yMaxWorld = 35;
+    let gameFunction = 'square';
+    let aGame = 0.5, bGame = 2.0;
+    let targetArea = 3.0, score = 0, timeLeft = 130;
+    let gameActive = true;
+    let highScore = localStorage.getItem('integralHighScore') ? parseInt(localStorage.getItem('integralHighScore')) : 0;
+    let timerInterval = null;
+    const tolerance = 0.8;
+
+    // DOM game
+    const gameSliderA = document.getElementById('gameSliderA');
+    const gameSliderB = document.getElementById('gameSliderB');
+    const gameAValue = document.getElementById('gameAValue');
+    const gameBValue = document.getElementById('gameBValue');
+    const gameIntegralDisplay = document.getElementById('gameIntegralDisplay');
+    const targetAreaDisplay = document.getElementById('targetAreaDisplay');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const highScoreDisplay = document.getElementById('highScoreDisplay');
+    const gameFuncSelect = document.getElementById('gameFuncSelect');
+    const attackBtn = document.getElementById('attackBtn');
+    const resetGameBtn = document.getElementById('resetGameBtn');
+    const gameFeedback = document.getElementById('gameFeedback');
+    const timerDisplaySpan = document.getElementById('timerDisplay');
+    const enemyZone = document.getElementById('enemyZone');
+    
+    const gameOverModal = document.getElementById('gameOverModal');
+    const modalResetBtn = document.getElementById('modalResetBtn');
+
+    highScoreDisplay.innerText = highScore;
+
+    function fGame(x) {
+        switch(gameFunction) {
+            case 'square': return x*x;
+            case 'sin': return Math.sin(x);
+            case 'cubic': return x*x*x - 2*x;
+            default: return x*x;
+        }
+    }
+
+    function hitungIntegralGame(aVal, bVal) {
+        if (aVal >= bVal) return 0;
+        const n = 2000;
+        const dx = (bVal - aVal) / n;
+        let total = 0;
+        for (let i = 0; i < n; i++) {
+            let x = aVal + (i + 0.5) * dx;
+            total += fGame(x) * dx;
+        }
+        return total;
+    }
+
+    // Target acak antara 1 hingga 100
+    function generateRandomTarget() { 
+        return parseFloat((Math.random() * 99 + 1).toFixed(2));
+    }
+
+    function worldToPixelGame(xWorld, yWorld) {
+        let px = ((xWorld - xMinWorld) / (xMaxWorld - xMinWorld)) * gameWidth;
+        let py = gameHeight - ((yWorld - yMinWorld) / (yMaxWorld - yMinWorld)) * gameHeight;
+        return {x: px, y: py};
+    }
+
+    function drawGame() {
+        ctxGame.clearRect(0, 0, gameWidth, gameHeight);
+        // grid & axes
+        ctxGame.strokeStyle = "#ccc8bc";
+        ctxGame.lineWidth = 0.6;
+        for (let x = Math.floor(xMinWorld); x <= xMaxWorld; x+=1) {
+            let p = worldToPixelGame(x,0);
+            ctxGame.beginPath(); ctxGame.moveTo(p.x,0); ctxGame.lineTo(p.x,gameHeight); ctxGame.stroke();
+        }
+        for (let y = Math.floor(yMinWorld); y <= yMaxWorld; y+=5) {
+            let p = worldToPixelGame(0,y);
+            ctxGame.beginPath(); ctxGame.moveTo(0,p.y); ctxGame.lineTo(gameWidth,p.y); ctxGame.stroke();
+        }
+        ctxGame.beginPath(); ctxGame.lineWidth = 2.5; ctxGame.strokeStyle = "#2c5e6e";
+        let originX = worldToPixelGame(0,0).x, originY = worldToPixelGame(0,0).y;
+        ctxGame.moveTo(0, originY); ctxGame.lineTo(gameWidth, originY);
+        ctxGame.moveTo(originX, 0); ctxGame.lineTo(originX, gameHeight);
+        ctxGame.stroke();
+        // arsir
+        if (aGame < bGame && gameActive) {
+            ctxGame.fillStyle = "rgba(46, 139, 87, 0.4)";
+            let step = (bGame - aGame) / 200;
+            ctxGame.beginPath();
+            let first = true;
+            for (let x = aGame; x <= bGame+1e-6; x+=step) {
+                let yCurve = fGame(x);
+                let p = worldToPixelGame(x, yCurve);
+                let pBase = worldToPixelGame(x, 0);
+                if (first) { ctxGame.moveTo(p.x, p.y); first = false; }
+                else ctxGame.lineTo(p.x, p.y);
+            }
+            for (let x = bGame; x >= aGame-1e-6; x-=step) {
+                let pBase = worldToPixelGame(x, 0);
+                ctxGame.lineTo(pBase.x, pBase.y);
+            }
+            ctxGame.closePath(); ctxGame.fill();
+        }
+        // kurva
+        ctxGame.beginPath(); ctxGame.lineWidth = 3; ctxGame.strokeStyle = "#e8633a";
+        let stepCurve = (xMaxWorld - xMinWorld)/800;
+        let firstCurve = true;
+        for (let x = xMinWorld; x <= xMaxWorld; x+=stepCurve) {
+            let y = fGame(x);
+            if (y < yMinWorld-0.5 || y > yMaxWorld+0.5) { firstCurve = true; continue; }
+            let p = worldToPixelGame(x, y);
+            if (firstCurve) { ctxGame.moveTo(p.x, p.y); firstCurve = false; }
+            else ctxGame.lineTo(p.x, p.y);
+        }
+        ctxGame.stroke();
+        // garis a,b
+        ctxGame.setLineDash([6,6]);
+        ctxGame.lineWidth = 1.8; ctxGame.strokeStyle = "#ff914d";
+        let pa = worldToPixelGame(aGame, yMinWorld); let pb = worldToPixelGame(aGame, yMaxWorld);
+        ctxGame.beginPath(); ctxGame.moveTo(pa.x, pa.y); ctxGame.lineTo(pb.x, pb.y); ctxGame.stroke();
+        let pa2 = worldToPixelGame(bGame, yMinWorld); let pb2 = worldToPixelGame(bGame, yMaxWorld);
+        ctxGame.beginPath(); ctxGame.moveTo(pa2.x, pa2.y); ctxGame.lineTo(pb2.x, pb2.y); ctxGame.stroke();
+        ctxGame.setLineDash([]);
+        ctxGame.fillStyle = "#b45a2a";
+        ctxGame.font = "bold 12px 'Segoe UI'";
+        let aPix = worldToPixelGame(aGame, fGame(aGame)); let bPix = worldToPixelGame(bGame, fGame(bGame));
+        ctxGame.fillText(`a=${aGame.toFixed(2)}`, aPix.x-12, aPix.y-6);
+        ctxGame.fillText(`b=${bGame.toFixed(2)}`, bPix.x+5, bPix.y-6);
+    }
+
+    function updateGameUI() {
+        aGame = parseFloat(gameSliderA.value);
+        bGame = parseFloat(gameSliderB.value);
+        if (aGame >= bGame) { bGame = Math.min(5, aGame+0.1); gameSliderB.value = bGame; }
+        gameAValue.innerText = aGame.toFixed(3);
+        gameBValue.innerText = bGame.toFixed(3);
+        let integral = hitungIntegralGame(aGame, bGame);
+        gameIntegralDisplay.innerText = integral.toFixed(4);
+        drawGame();
+        return integral;
+    }
+
+    // Fungsi menampilkan notifikasi trumpet
+    function showTrumpetCelebration() {
+        const notification = document.createElement('div');
+        notification.className = 'trumpet-notification';
+        notification.innerHTML = '🎺 SELAMAT! HIGH SCORE > 10! 🎺<br>🎉 Anda Hebat! 🎉';
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.remove();
+        }, 2000);
+    }
+
+    function performStrike() {
+        if (!gameActive) { gameFeedback.innerHTML = "⛔ GAME OVER! Tekan RESET."; return; }
+        let integralNow = hitungIntegralGame(aGame, bGame);
+        let diff = Math.abs(integralNow - targetArea);
+        if (diff <= tolerance) {
+            // SUKSES
+            score++;
+            scoreDisplay.innerText = score;
+            let isNewHighScore = (score > highScore);
+            if (isNewHighScore) { 
+                highScore = score; 
+                highScoreDisplay.innerText = highScore; 
+                localStorage.setItem('integralHighScore', highScore); 
+                gameFeedback.innerHTML = "🏆 HIGH SCORE BARU! 🏆 +1 SKOR & +5 DETIK 🎉 SELAMAT! Anda menang! Lanjut ke target selanjutnya! 🎉"; 
+                // Cek jika high score > 10, tampilkan trumpet
+                if (highScore > 10) {
+                    showTrumpetCelebration();
+                }
+            } else { 
+                gameFeedback.innerHTML = `✨ PERFECT STRIKE! +1 SKOR & +5 DETIK ✨<br>🎉 SELAMAT! Anda berhasil! Lanjut ke target selanjutnya! 🎉 (jarak ${diff.toFixed(2)})`; 
+            }
+            gameFeedback.classList.add('success-flash');
+            setTimeout(() => gameFeedback.classList.remove('success-flash'), 1000);
+            timeLeft += 5;
+            if (timeLeft > 99) timeLeft = 99;
+            updateTimerDisplay();
+            targetArea = generateRandomTarget();
+            targetAreaDisplay.innerText = targetArea.toFixed(2);
+            enemyZone.classList.add('blink'); 
+            setTimeout(() => enemyZone.classList.remove('blink'), 400);
+            updateGameUI();
+        } else {
+            // GAGAL
+            timeLeft -= 1;
+            if (timeLeft < 0) timeLeft = 0;
+            updateTimerDisplay();
+            gameFeedback.innerHTML = `💥 MELESET! Jarak ${diff.toFixed(2)} (toleransi ±${tolerance}) -1 detik 💥`;
+            enemyZone.style.transform = "scale(0.95)"; 
+            setTimeout(() => enemyZone.style.transform = "", 200);
+            updateGameUI();
+            if (timeLeft <= 0) gameOver();
+        }
+        if (timeLeft <= 0) gameOver();
+    }
+
+    function updateTimerDisplay() { 
+        timerDisplaySpan.innerText = Math.floor(timeLeft); 
+        if (timeLeft <= 10) timerDisplaySpan.style.color = "#ffaa55";
+        else timerDisplaySpan.style.color = "white";
+    }
+
+    function showGameOverModal() {
+        gameOverModal.style.display = "flex";
+    }
+
+    function hideModal() {
+        gameOverModal.style.display = "none";
+    }
+
+    function gameOver() {
+        if (!gameActive) return;
+        gameActive = false;
+        if (timerInterval) clearInterval(timerInterval);
+        attackBtn.disabled = true;
+        gameSliderA.disabled = true; gameSliderB.disabled = true; gameFuncSelect.disabled = true;
+        gameFeedback.innerHTML = "💀 GAME OVER 💀 Tekan RESET untuk bermain lagi.";
+        document.getElementById('gamePanel').classList.add('game-over-overlay');
+        showGameOverModal();
+    }
+
+    function resetGame() {
+        if (timerInterval) clearInterval(timerInterval);
+        gameActive = true;
+        score = 0; 
+        timeLeft = 130;
+        targetArea = generateRandomTarget();
+        scoreDisplay.innerText = "0";
+        targetAreaDisplay.innerText = targetArea.toFixed(2);
+        updateTimerDisplay();
+        attackBtn.disabled = false;
+        gameSliderA.disabled = false; gameSliderB.disabled = false; gameFuncSelect.disabled = false;
+        document.getElementById('gamePanel').classList.remove('game-over-overlay');
+        gameFeedback.innerHTML = "✨ Game direset! (toleransi ±0.8) Target 1-100. Serang dengan mudah! ✨";
+        gameSliderA.value = 0.5; gameSliderB.value = 2.0;
+        aGame = 0.5; bGame = 2.0;
+        updateGameUI();
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            if (timeLeft > 0) { 
+                timeLeft--; 
+                updateTimerDisplay(); 
+                if (timeLeft <= 0) gameOver(); 
+            } else { 
+                gameOver(); 
+            }
+        }, 1000);
+        hideModal();
+    }
+
+    gameSliderA.addEventListener('input', () => { if(gameActive) updateGameUI(); });
+    gameSliderB.addEventListener('input', () => { if(gameActive) updateGameUI(); });
+    gameFuncSelect.addEventListener('change', () => { gameFunction = gameFuncSelect.value; updateGameUI(); });
+    attackBtn.addEventListener('click', performStrike);
+    resetGameBtn.addEventListener('click', resetGame);
+    modalResetBtn.addEventListener('click', resetGame);
+
+    function initGame() {
+        highScore = localStorage.getItem('integralHighScore') ? parseInt(localStorage.getItem('integralHighScore')) : 0;
+        highScoreDisplay.innerText = highScore;
+        score = 0; scoreDisplay.innerText = "0";
+        targetArea = generateRandomTarget(); targetAreaDisplay.innerText = targetArea.toFixed(2);
+        gameSliderA.value = 0.5; gameSliderB.value = 2.0; aGame=0.5; bGame=2.0;
+        gameFunction = 'square'; gameFuncSelect.value = 'square';
+        gameActive = true; timeLeft = 130; updateTimerDisplay();
+        updateGameUI();
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) gameOver(); }
+            else gameOver();
+        }, 1000);
+        attackBtn.disabled = false; gameSliderA.disabled = false; gameSliderB.disabled = false; gameFuncSelect.disabled = false;
+        document.getElementById('gamePanel').classList.remove('game-over-overlay');
+        gameFeedback.innerHTML = "✨ Mode Mudah: toleransi ±0.8, target 1-100, waktu awal 130 detik. Selamat bermain! ✨";
+        hideModal();
+    }
+    initGame();
+</script>
+</body>
+</html>
